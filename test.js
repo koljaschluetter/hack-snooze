@@ -46,3 +46,40 @@ var firstStory = user.ownStories[0];
 storyList.removeStory(user, firstStory.storyId, function(response) {
   console.log(response); // this will contain an empty list of stories
 });
+
+var newStoryData = {
+  title: 'testing again',
+  author: 'A Rithm Instructor',
+  url: 'https://www.rithmschool.com'
+};
+
+storyList.addStory(user, newStoryData, function(response) {
+  var firstStory = user.ownStories[0];
+  user.addFavorite(firstStory.storyId, function(response) {
+    console.log(response); // this should include the added favorite!
+  });
+});
+
+var newStoryData = {
+  title: 'testing again',
+  author: 'A Rithm Instructor',
+  url: 'https://www.rithmschool.com'
+};
+storyList.addStory(user, newStoryData, function(response) {
+  var firstStory = user.ownStories[0];
+  user.addFavorite(firstStory.storyId, function(response) {
+    user.removeFavorite(firstStory.storyId, function(response) {
+      // this should include the removed favorite!
+      console.log(response);
+    });
+  });
+});
+
+var updatedData = {
+  title: 'NO MORE TESTING!',
+  author: 'A Rithm Instructor',
+  url: 'https://www.taco.com'
+};
+user.ownStories[0].update(user, updatedData, function(response) {
+  console.log(response); // this should be the updated story instance!
+});

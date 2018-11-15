@@ -31,17 +31,22 @@ class StoryList {
     });
   }
 
-  removeStory(user, storyID, cb) {
+  removeStory(user, storyId, cb) {
     let deletePayload = { token: user.loginToken };
 
-    $.ajax(
-      'DELETE',
-      `${BASE_URL}/stories/${storyID}`,
-      deletePayload,
-      response => {
-        return cb(response);
+    $.ajax({
+      url: `${BASE_URL}/stories/${storyId}`,
+      method: 'DELETE',
+      data: deletePayload,
+      success: response => {
+        const storyIndex = this.stories.findIndex(
+          story => story.storyId === storyId
+        );
+
+        this.stories.splice(storyIndex, 1);
+        user.retrieveDetails(() => cb(response));
       }
-    );
+    });
   }
 }
 
@@ -64,25 +69,16 @@ class User {
       }
     };
 
-    $.post(
-      `https://hack-or-snooze-v2.herokuapp.com/signup`,
-      userObj,
-      response => {
-        const { username, name, favorites, stories } = response.user;
-        const token = response.token;
+    $.post(`${BASE_URL}/signup`, userObj, response => {
+      const { username, name, favorites, stories } = response.user;
+      const token = response.token;
 
-        let user = new User(
-          username,
-          password,
-          name,
-          token,
-          favorites,
-          stories
-        );
+      localStorage.setItem('token', token);
 
-        return cb(user);
-      }
-    );
+      let user = new User(username, password, name, token, favorites, stories);
+
+      return cb(user);
+    });
   }
 
   login(cb) {
@@ -93,25 +89,91 @@ class User {
       }
     };
 
-    $.post(`https://hack-or-snooze-v2.herokuapp.com/login`, loginObj, function(
-      response
-    ) {
+    $.post(`${BASE_URL}/login`, loginObj, function(response) {
+      localStorage.setItem('token', response.token);
       return cb(response);
     });
   }
 
   retrieveDetails(cb) {
     $.get(
-      `https://hack-or-snooze-v2.herokuapp.com/users/${this.username}?token=${
-        this.loginToken
-      }`,
+      `${BASE_URL}/users/${this.username}`,
+      {
+        token: this.loginToken
+      },
       response => {
         this.favorites = response.user.favorites;
         this.ownStories = response.user.stories;
 
+        this.ownStories = response.user.stories.map(story => {
+          const { username, title, author, url, storyId } = story;
+
+          return new Story(username, title, author, url, storyId);
+        });
+
         return cb(this);
       }
     );
+  }
+
+  addFavorite(storyId, cb) {
+    let tokenPayload = {
+      token: this.loginToken
+    };
+
+    $.post(
+      `${BASE_URL}/users/${this.username}/favorites/${storyId}`,
+      tokenPayload,
+      response => {
+        this.retrieveDetails(() => cb(response));
+      }
+    );
+  }
+
+  removeFavorite(storyId, cb) {
+    let tokenPayload = {
+      token: this.loginToken
+    };
+
+    $.ajax({
+      url: `${BASE_URL}/users/${this.username}/favorites/${storyId}`,
+      method: 'DELETE',
+      data: tokenPayload,
+      success: response => {
+        this.retrieveDetails(() => cb(response));
+      }
+    });
+  }
+
+  update(userData, cb) {
+    let patchPayload = {
+      token: this.loginToken,
+      user: userData
+    };
+
+    $.ajax({
+      url: `${BASE_URL}/users/${this.username}`,
+      method: 'PATCH',
+      data: patchPayload,
+      success: response => {
+        this.retrieveDetails(() => cb(response));
+      }
+    });
+  }
+
+  remove(cb) {
+    let deletePayload = {
+      token: this.loginToken
+    };
+
+    $.ajax({
+      url: `${BASE_URL}/users/${this.username}`,
+      method: 'DELETE',
+      data: deletePayload,
+      success: response => {
+        cb(response);
+      }
+    });
   }
 }
 
@@ -122,5 +184,18 @@ class Story {
     this.url = url;
     this.username = username;
     this.storyId = storyId;
+  }
+
+  update(user, storyData, cb) {
+    let patchPayload = { token: user.loginToken, story: storyData };
+
+    $.ajax({
+      url: `${BASE_URL}/stories/${this.storyId}`,
+      method: 'PATCH',
+      data: patchPayload,
+      success: response => {
+        user.retrieveDetails(() => cb(response));
+      }
+    });
   }
 }
