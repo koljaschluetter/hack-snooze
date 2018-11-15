@@ -20,6 +20,29 @@ class StoryList {
       return cb(storyList);
     });
   }
+
+  addStory(user, story, cb) {
+    const postPayload = { token: user.loginToken, story };
+
+    $.post(`${BASE_URL}/stories`, postPayload, response => {
+      user.retrieveDetails(function() {
+        return cb(response);
+      });
+    });
+  }
+
+  removeStory(user, storyID, cb) {
+    let deletePayload = { token: user.loginToken };
+
+    $.ajax(
+      'DELETE',
+      `${BASE_URL}/stories/${storyID}`,
+      deletePayload,
+      response => {
+        return cb(response);
+      }
+    );
+  }
 }
 
 class User {
@@ -69,8 +92,6 @@ class User {
         password: this.password
       }
     };
-
-    console.log(this.username, this.password);
 
     $.post(`https://hack-or-snooze-v2.herokuapp.com/login`, loginObj, function(
       response
