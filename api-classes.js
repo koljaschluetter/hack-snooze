@@ -271,20 +271,66 @@ $(function() {
       // call helper to show one story
     },
 
+    loginUserSubmission: function() {
+      event.preventDefault();
+      const usernameInput = $('#username').val();
+      const passwordInput = $('#password').val();
+
+      // Summary: Submit form, Log User In, Store Token, Retrieve new stories
+      // call login Function - check what that requires
+      //      then call retreive all user details
+      //            then call displayAllStories again
+
+      this.user.username = usernameInput;
+      this.user.password = passwordInput;
+      this.user.login(() => {
+        this.user.retrieveDetails(() => {
+          StoryList.getStories(result => {
+            this.storyList = result;
+            this.checkForLoggedUser();
+          });
+        });
+      });
+    },
+
     checkForLoggedUser: function() {
-      // logic for if token exist diplay username
+      // Logic to check if a token exists / User is logged in
       const token = localStorage.getItem('token');
       const username = localStorage.getItem('username');
+
+      // If User token is found in LocalStorage
       if (token) {
         this.user.loginToken = token;
         this.user.username = username;
         this.user.retrieveDetails(result => {
+          // Create DOM Elements in right side of nav-bar
           const displayName = result.name;
           $('#loginContainer').empty();
-          $('#loginContainer').append($('<span>').text(displayName));
+          $('#loginContainer')
+            .append(
+              $('<span>')
+                .text(displayName)
+                .addClass('mr-2')
+            )
+            .append(
+              $('<button>')
+                .text('Logout')
+                .addClass('btn btn-dark my-2 my-sm-0')
+                .attr('type', 'submit')
+                .on('click', () => {
+                  // delete Local Storage
+                  localStorage.clear();
+
+                  // rerender full stories
+                  StoryList.getStories(result => {
+                    this.storyList = result;
+                    this.checkForLoggedUser();
+                  });
+                })
+            );
         });
       } else {
-        // dump into navbar sign
+        // User token does not exist. Create Sign In in right side of nav bar
         $('#loginContainer').empty();
         $('#loginContainer').append(
           $('<form>')
@@ -308,78 +354,9 @@ $(function() {
                 .text('Login')
                 .addClass('btn btn-dark my-2 my-sm-0')
                 .attr('type', 'submit')
-                .on('click', event => {
-                  event.preventDefault();
-                  const usernameInput = $('#username').val();
-                  const passwordInput = $('#password').val();
-
-                  // submit form, store token, retrieve new page
-
-                  // call login Function - check what that requires
-                  //      then call retreive all user details
-                  //            then call displayAllStories again
-
-                  this.user.username = usernameInput;
-                  this.user.password = passwordInput;
-                  this.user.login(() => {
-                    this.user.retrieveDetails(() => {
-                      console.log(this.storyList);
-                      StoryList.getStories(result => {
-                        this.storyList = result;
-                        this.checkForLoggedUser();
-                      });
-                    });
-                  });
-                })
-            )
-            .append(
-              $('<button>')
-                .text('Login')
-                .addClass('btn btn-dark my-2 my-sm-0')
-                .attr('type', 'submit')
-                .on('click', event => {
-                  event.preventDefault();
-                  const usernameInput = $('#username').val();
-                  const passwordInput = $('#password').val();
-
-                  // submit form, store token, retrieve new page
-
-                  // call login Function - check what that requires
-                  //      then call retreive all user details
-                  //            then call displayAllStories again
-
-                  this.user.username = usernameInput;
-                  this.user.password = passwordInput;
-                  this.user.login(() => {
-                    this.user.retrieveDetails(() => {
-                      console.log(this.storyList);
-                      StoryList.getStories(result => {
-                        this.storyList = result;
-                        this.checkForLoggedUser();
-                      });
-                    });
-                  });
-                })
+                .on('click', this.loginUserSubmission.bind(this))
             )
         );
-
-        //   <form class="form-inline my-2 my-lg-0">
-        //   <input
-        //     class="form-control mr-sm-2"
-        //     type="text"
-        //     placeholder="Username"
-        //     aria-label="Username"
-        //   />
-        //   <input
-        //     class="form-control mr-sm-2"
-        //     type="password"
-        //     placeholder="Password"
-        //     aria-label="Password"
-        //   />
-        //   <button class="btn btn-outline-success my-2 my-sm-0" type="submit">
-        //     Login
-        //   </button>
-        // </form>
       }
     }
   };
