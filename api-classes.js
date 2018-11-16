@@ -268,7 +268,6 @@ $(function() {
               .addClass('story--detail')
           )
       );
-      // call helper to show one story
     },
 
     loginUserSubmission: function() {
@@ -293,12 +292,12 @@ $(function() {
       });
     },
 
+    // Logic to check if a token exists / User is logged in
     checkForLoggedUser: function() {
-      // Logic to check if a token exists / User is logged in
       const token = localStorage.getItem('token');
       const username = localStorage.getItem('username');
 
-      // If User token is found in LocalStorage
+      // If user token is found in LocalStorage
       if (token) {
         this.user.loginToken = token;
         this.user.username = username;
@@ -330,7 +329,7 @@ $(function() {
             );
         });
       } else {
-        // User token does not exist. Create Sign In in right side of nav bar
+        // User token does not exist. Create sign in on right side of nav bar
         $('#loginContainer').empty();
         $('#loginContainer').append(
           $('<form>')
