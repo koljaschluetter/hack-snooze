@@ -22,12 +22,15 @@ body {
 
 #new-form,
 #stories,
-#createuser-form {
+#createuser-form,
+#updateprofile-form {
   background-color: #f6f6ef;
 }
 
 #new-form,
-#createuser-form {
+#createuser-form,
+.element--hide,
+#updateprofile-form {
   display: none;
 }
 

@@ -133,16 +133,79 @@
       </form>
     </div>
 
+    <!-- --------------- Profile User Form ------------ -->
+    <div id="updateprofile-form">
+      <form class="form-horizontal">
+        <div class="form-group row">
+          <label for="updateprofile-username" class="pl-4 col-sm-2 form-label"
+            >Username</label
+          >
+          <div class="col-sm-6">
+            <input
+              readonly
+              type="text"
+              class="form-control"
+              id="updateprofile-username"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="form-group row">
+          <label
+            for="updateprofile-displayname"
+            class="pl-4 col-sm-2 form-label"
+            >Display Name</label
+          >
+          <div class="col-sm-6">
+            <input
+              required
+              type="text"
+              class="form-control"
+              id="updateprofile-displayname"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="updateprofile-password" class="pl-4 col-sm-2 form-label"
+            >Password</label
+          >
+          <div class="col-sm-6">
+            <input
+              required
+              type="password"
+              class="form-control"
+              id="updateprofile-password"
+              autocomplete="off"
+              placeholder="enter new password"
+            />
+            <!-- Potentially add another field to confirm password -->
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary">
+              Update Profile
+            </button>
+          </div>
+        </div>
+      </form>
+    </div>
+
     <ol id="stories">
       <!--
-        <li>
+        <li id="234734908284093284092384092">
           <div class="story--header">
             <span class="far fa-star"></span>
             <a target="_blank" href="https://visualgo.net/">Visualizing Algorithms</a>
             <small>(visualgo.net)</small>
           </div>
           <div class="story--detail">
+            <span class="hidden">
             <a href="#">Delete Story</a>
+            </span>
+            <span class="hackorsnoozedetails">
+            </span>
           </div>
         </li>
       -->

@@ -62,26 +62,26 @@ $(function() {
     $favorites.text('all');
   });
 
-  $stories.on('click', '.far, .fas', function(e) {
-    $(e.target).toggleClass('far fas');
-  });
+  // $stories.on('click', '.far, .fas', function(e) {
+  //   $(e.target).toggleClass('far fas');
+  // });
 
-  $favorites.on('click', function(e) {
-    if ($favorites.text() === 'favorites') {
-      $stories
-        .children('li')
-        .filter(function(i, el) {
-          return $(el)
-            .children('.fa-star')
-            .hasClass('far');
-        })
-        .hide();
-      $stories.addClass('hide-numbers');
-      $favorites.text('all');
-    } else {
-      $stories.children('li').show();
-      $stories.removeClass('hide-numbers');
-      $favorites.text('favorites');
-    }
-  });
+  //   $favorites.on('click', function(e) {
+  //     if ($favorites.text() === 'favorites') {
+  //       $stories
+  //         .children('li')
+  //         .filter(function(i, el) {
+  //           return $(el)
+  //             .children('.fa-star')
+  //             .hasClass('far');
+  //         })
+  //         .hide();
+  //       $stories.addClass('hide-numbers');
+  //       $favorites.text('all');
+  //     } else {
+  //       $stories.children('li').show();
+  //       $stories.removeClass('hide-numbers');
+  //       $favorites.text('favorites');
+  //     }
+  //   });
 });

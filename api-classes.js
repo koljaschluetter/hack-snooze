@@ -212,6 +212,8 @@ $(function() {
 
     // data get all Stories
     displayAllStories: function() {
+      // delete all existing stories in order to re-render page
+      $('#stories').empty();
       StoryList.getStories(storyList => {
         this.storyList = storyList;
 
@@ -222,9 +224,37 @@ $(function() {
       });
     },
 
+    // do all things related to creating a favorites page view
+    displayFavoriteStories: function() {
+      // delete all existing stories in order to re-render page
+      $('#stories').empty();
+
+      // grab user facorites
+      this.user.favorites.forEach(storyObj => {
+        this.displaySingleStory(storyObj);
+      });
+    },
+
+    // return false if story is not found in user's ownStories ArraY, other true
+    isUserOwnedStory: function(targetStoryId) {
+      // if user is not defined yet, return false
+      if (this.user.name === undefined) {
+        return false;
+      }
+      // finds the index of the storyObj in the ownStories array that matches targetStoryId
+      const storyObjIndex = this.user.ownStories.findIndex(storyObj => {
+        return storyObj.storyId === targetStoryId;
+      });
+
+      // if targetStoryId is not found in ownStories, return false, otherwise true
+      if (storyObjIndex === -1) {
+        return false;
+      }
+      return true;
+    },
+
     displaySingleStory: function(storyObj) {
       // this will then create jquery div container for one story with all details
-      // temp remove due to garbage data in api
       let $newLink = $('<a>', {
         text: `random`,
         href: storyObj.url,
@@ -237,14 +267,21 @@ $(function() {
         .slice(-2)
         .join('.');
 
-      // TODO LIST
+      // code section for determining if we should show delete button
+      let deleteClassString;
+      if (this.isUserOwnedStory(storyObj.storyId)) {
+        deleteClassString = 'delete--element'; // dont hide item (no class needed)
+      } else {
+        deleteClassString = 'delete--element element--hide'; //hide item using class css
+      }
 
-      // 1. DISPLAY LOGIC - render how favorite star looks if the story is or is not in user favorite
-      //      impact only the star thing
-
-      // 2. DISPLAY LGOIC - delete button related - show Delete BUTTON element only if storyID is in user ownStories
-
-      // 3. DISPLAY LOGIC - edit functionality - potentially add MODEL POPUP For Editing
+      // determines if current storyID is in user's favorite and determine star color
+      let favoriteClassString;
+      if (this.isStoryInUserFavorites(storyObj.storyId)) {
+        favoriteClassString = 'fas fa-star';
+      } else {
+        favoriteClassString = 'far fa-star';
+      }
 
       $('#stories').append(
         $('<li>')
@@ -252,7 +289,7 @@ $(function() {
           .append(
             $('<div>')
               .addClass('story--header')
-              .append($('<span>').addClass('far fa-star'))
+              .append($('<span>').addClass(favoriteClassString))
               .append(
                 $('<a>')
                   .attr('target', '_blank')
@@ -264,9 +301,13 @@ $(function() {
           .append(
             $('<div>')
               .append(
-                $('<a>')
-                  .attr('href', '#')
-                  .text('Delete')
+                $('<span>')
+                  .addClass(deleteClassString)
+                  .append(
+                    $('<a>')
+                      .attr('href', '#')
+                      .text('Delete')
+                  )
               )
               .addClass('story--detail')
           )
@@ -296,7 +337,7 @@ $(function() {
     },
 
     // Logic to check if a token exists / User is logged in
-    checkForLoggedUser: function() {
+    checkForLoggedUser: function(cb) {
       const token = localStorage.getItem('token');
       const username = localStorage.getItem('username');
 
@@ -314,9 +355,13 @@ $(function() {
           $('#loginContainer').empty();
           $('#loginContainer')
             .append(
-              $('<span>')
-                .text(displayName)
-                .addClass('mr-2')
+              $('<span>').append(
+                $('<a>')
+                  .text(displayName)
+                  .addClass('mr-2')
+                  .attr('href', 'javascript:void(0)')
+                  .attr('id', 'profile')
+              )
             )
             .append(
               $('<button>')
@@ -334,6 +379,7 @@ $(function() {
                   });
                 })
             );
+          return cb();
         });
       } else {
         // User token does not exist. Create sign in on right side of nav bar
@@ -378,6 +424,7 @@ $(function() {
                 })
             )
         );
+        return cb();
       }
     },
 
@@ -414,9 +461,7 @@ $(function() {
 
       this.storyList.addStory(this.user, storyDataPayload, response => {
         $('#new-form').slideToggle();
-        console.log('addStory succeeded');
         this.user.retrieveDetails(user => {
-          console.log('retreive details succeeded');
           setTimeout(1000, this.displayAllStories.bind(this));
           // retreive latest user details - user.ownStories
           //   re-render dom stories
@@ -426,6 +471,51 @@ $(function() {
       });
     },
 
+    // returns true or false - checks if storyID is in user Favorites
+    isStoryInUserFavorites: function(targetStoryId) {
+      // if user is not defined yet, return false
+      if (this.user.name === undefined) {
+        return false;
+      }
+
+      // finds the index of the storyObj in the favorites array that matches targetStoryId
+      const storyObjIndex = this.user.favorites.findIndex(storyObj => {
+        return storyObj.storyId === targetStoryId;
+      });
+
+      // if targetStoryId is not found in ownStories, return false, otherwise true
+      if (storyObjIndex === -1) {
+        return false;
+      }
+      return true;
+    },
+
+    // update(userData, cb)
+
+    updateUserProfile: function() {
+      // grab the values from the form
+
+      const name = $('#updateprofile-displayname').val();
+      const password = $('#updateprofile-password').val();
+
+      const updateData = {
+        name,
+        password
+      };
+
+      this.user.update(updateData, response => {
+        console.log('completed');
+        $('#updateprofile-form').slideUp();
+        $('#profile').text(name);
+      });
+      //    send update patch request to the API
+      //    toggle the form div back up using slideup
+      //       update displayName next to Logout
+
+      // TODO future: if you show username/name details in the stories, have to re-render stories
+      // TODO future: confirm old password to create new password - on file
+    },
+
     createEventListeners: function() {
       // event listener - crete user submission
       $('#createuser-form').on('submit', this.createUserSub.bind(this));
@@ -433,34 +523,91 @@ $(function() {
       // event listener - submit new story to API
       $('#new-form').on('submit', this.addNewStory.bind(this));
 
-      // event listener - parent delegation for stories container
-      $('#stories').on('click', '.far, .fas', function(e) {
-        $(e.target).toggleClass('far fas');
+      // event listener - update uesrprofile
+      $('#updateprofile-form').on('submit', this.updateUserProfile.bind(this));
 
+      // event listener - show user profile form - slide toggle
+      $('#loginContainer').on('click', '#profile', event => {
+        event.preventDefault();
+        $('#updateprofile-form').slideToggle();
+
+        // populate profile with name, username
+        $('#updateprofile-username').val(this.user.username);
+        $('#updateprofile-displayname').val(this.user.name);
+      });
+
+      // event listener - parent delegation for adding/remove stories from favorites
+      $('#stories').on('click', '.far, .fas', event => {
         // grab story id of parent li target = storyID
-        // if - is storyID in userFavorite
-        //     if yes, then remove from userFavorite via APi call
-        //           then retreive updated details for user via API call
+        const storyId = $(event.target)
+          .closest('li')
+          .attr('id');
 
-        // else - (storyID is NOT in userFavorites)
-        //     run api call to add to userfavorites
-        //          retrieve details
+        // logic for adding/remove story for userFavorites
+        if (domView.isStoryInUserFavorites(storyId)) {
+          //     if yes, then remove from userFavorite via APi call
+          this.user.removeFavorite(storyId, response => {
+            // swaps rendering of star on click
+            $(event.target).toggleClass('far fas');
 
-        // for each star, which story are we are talking ID
-        //    event listener ogic
+            // then retreive userDetails from API
+            this.user.retrieveDetails(user => {
+              return;
+            });
+          });
+        } else {
+          // else - (storyID is NOT in userFavorites)
+          this.user.addFavorite(storyId, response => {
+            // swaps rendering of star on click
+            $(event.target).toggleClass('far fas');
 
-        //    html element logic
-        //      for each story we will need to store the storyID during display
-        //      rendering - user favorites - check if storyID is in userFavoriteArray
-        //    hide stars when you're not a user logged in
+            // then retreive userDetails from API
+            this.user.retrieveDetails(user => {
+              return;
+            });
+          });
+        }
+
+        // optional, if you may want to rerender favorites page after toggles
+        //    currently it does not
+        //    would require you to pull current text value of favorites link to determin which view to rerender - displayfavorites or displayall
+      });
+
+      // event listener - to delete a story the user owns
+      $('#stories').on('click', '.delete--element', event => {
+        event.preventDefault();
+        // grabs storyId of parent Element that delete button is in
+        const storyId = $(event.target)
+          .closest('li')
+          .attr('id');
+
+        // make api call to delete a story, then rerender page w/ display all stories
+        this.storyList.removeStory(this.user, storyId, () => {
+          console.log('delete succeded');
+          // removeStory chains retreieveDetails for you, then runs cb aftwards
+          this.displayAllStories();
+        });
+      });
+
+      // even listener for favorites/all element
+      $('#favorites').on('click', event => {
+        const currentLinkText = $('#favorites').text();
+        if (currentLinkText === 'favorites') {
+          //call our favor func
+          $('#favorites').text('all');
+          domView.displayFavoriteStories();
+        } else if (currentLinkText === 'all') {
+          //call our displayallstories render func
+          $('#favorites').text('favorites');
+          domView.displayAllStories();
+        }
       });
     }
   };
 
-  // event listeners for button elements - global events
-
-  // initial all stories
-  domView.checkForLoggedUser();
-  domView.displayAllStories();
+  // check for logged in user, then display all user stories
+  domView.checkForLoggedUser(() => {
+    domView.displayAllStories();
+  });
   domView.createEventListeners();
 });
