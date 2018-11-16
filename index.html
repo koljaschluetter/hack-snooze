@@ -31,7 +31,9 @@
       <div class="collapse navbar-collapse" id="navbarText">
         <ul class="navbar-nav mr-auto">
           <li class="nav-item">
-            <a href="javascript:void(0)" class="nav-link" id="submit">submit</a>
+            <a href="javascript:void(0)" class="nav-link" id="submit"
+              >add story</a
+            >
           </li>
           <li class="nav-item">
             <a href="javascript:void(0)" class="nav-link" id="favorites"
@@ -43,6 +45,7 @@
       </div>
     </nav>
 
+    <!-- --------------- Add Story Link Form ------------ -->
     <div id="new-form">
       <form class="form-horizontal">
         <div class="form-group row">
@@ -71,7 +74,60 @@
         </div>
         <div class="form-group">
           <div class="col-sm-offset-2 col-sm-10">
-            <button type="submit" class="btn btn-primary">submit</button>
+            <button type="submit" class="btn btn-primary">submit story</button>
+          </div>
+        </div>
+      </form>
+    </div>
+
+    <!-- --------------- Create New User Form ------------ -->
+    <div id="createuser-form">
+      <form class="form-horizontal">
+        <div class="form-group row">
+          <label for="create-displayname" class="pl-4 col-sm-2 form-label"
+            >Display Name</label
+          >
+          <div class="col-sm-6">
+            <input
+              required
+              type="text"
+              class="form-control"
+              id="create-displayname"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="createuser-username" class="pl-4 col-sm-2 form-label"
+            >Username</label
+          >
+          <div class="col-sm-6">
+            <input
+              required
+              type="text"
+              class="form-control"
+              id="create-username"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="form-group row">
+          <label for="create-password" class="pl-4 col-sm-2 form-label"
+            >Password</label
+          >
+          <div class="col-sm-6">
+            <input
+              required
+              type="password"
+              class="form-control"
+              id="create-password"
+              autocomplete="off"
+            />
+          </div>
+        </div>
+        <div class="form-group">
+          <div class="col-sm-offset-2 col-sm-10">
+            <button type="submit" class="btn btn-primary">Submit</button>
           </div>
         </div>
       </form>

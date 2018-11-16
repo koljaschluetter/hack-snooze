@@ -12,9 +12,9 @@ class StoryList {
   static getStories(cb) {
     $.getJSON(`${BASE_URL}/stories`, function(response) {
       const stories = response.stories.map(function(story) {
-        const { username, title, author, url, storyId } = story;
+        const { author, title, url, username, storyId } = story;
 
-        return new Story(username, title, author, url, storyId);
+        return new Story(author, title, url, username, storyId);
       });
 
       const storyList = new StoryList(stories);
@@ -212,11 +212,11 @@ $(function() {
 
     // data get all Stories
     displayAllStories: function() {
-      StoryList.getStories(results => {
-        this.storyList = results.stories;
+      StoryList.getStories(storyList => {
+        this.storyList = storyList;
 
         // we have the stories, loop over all stories
-        this.storyList.forEach(storyObj => {
+        this.storyList.stories.forEach(storyObj => {
           this.displaySingleStory(storyObj);
         });
       });
@@ -225,26 +225,30 @@ $(function() {
     displaySingleStory: function(storyObj) {
       // this will then create jquery div container for one story with all details
       // temp remove due to garbage data in api
-      // let $newLink = $('<a>', {
-      //   text: `random`,
-      //   href: storyObj.url,
-      //   target: '_blank'
-      // });
+      let $newLink = $('<a>', {
+        text: `random`,
+        href: storyObj.url,
+        target: '_blank'
+      });
 
-      // let hostname = $newLink
-      //   .prop('hostname')
-      //   .split('.')
-      //   .slice(-2)
-      //   .join('.');
+      let hostname = $newLink
+        .prop('hostname')
+        .split('.')
+        .slice(-2)
+        .join('.');
 
       // TODO LIST
-      // 1. Iterate through user'a favorites and see if this item is a favorite
-      //       If true, make sure it is a solid star
-      // 2. CHeck if the current story was created by current user
-      //       If true, make sure there is a delete button for that story
+
+      // 1. DISPLAY LOGIC - render how favorite star looks if the story is or is not in user favorite
+      //      impact only the star thing
+
+      // 2. DISPLAY LGOIC - delete button related - show Delete BUTTON element only if storyID is in user ownStories
+
+      // 3. DISPLAY LOGIC - edit functionality - potentially add MODEL POPUP For Editing
 
       $('#stories').append(
         $('<li>')
+          .attr('id', storyObj.storyId)
           .append(
             $('<div>')
               .addClass('story--header')
@@ -255,8 +259,7 @@ $(function() {
                   .attr('href', storyObj.url)
                   .text(storyObj.title)
               )
-              .append($('<small>').text(`(${storyObj.url})`))
-            // .append($('<small>').text(`(${hostname})`))
+              .append($('<small>').text(`(${hostname})`))
           )
           .append(
             $('<div>')
@@ -299,6 +302,10 @@ $(function() {
 
       // If user token is found in LocalStorage
       if (token) {
+        // logic to hide user-required links on navbar
+        $('#submit').show();
+        $('#favorites').show();
+
         this.user.loginToken = token;
         this.user.username = username;
         this.user.retrieveDetails(result => {
@@ -330,6 +337,11 @@ $(function() {
         });
       } else {
         // User token does not exist. Create sign in on right side of nav bar
+
+        // logic to hide user-required links on navbar
+        $('#submit').hide();
+        $('#favorites').hide();
+
         $('#loginContainer').empty();
         $('#loginContainer').append(
           $('<form>')
@@ -355,11 +367,100 @@ $(function() {
                 .attr('type', 'submit')
                 .on('click', this.loginUserSubmission.bind(this))
             )
+            .append(
+              $('<button>')
+                .text('Create User')
+                .addClass('btn btn-success my-2 my-sm-0 ml-1')
+                .attr('id', 'createuser-button')
+                .on('click', event => {
+                  event.preventDefault();
+                  $('#createuser-form').slideToggle();
+                })
+            )
         );
       }
+    },
+
+    createUserSub: function(event) {
+      event.preventDefault();
+
+      // grab values from forms
+      const name = $('#create-displayname').val();
+      const username = $('#create-username').val();
+      const password = $('#create-password').val();
+
+      // submit data to API
+      User.create(username, password, name, user => {
+        $('#createuser-form').slideUp();
+        this.checkForLoggedUser();
+        this.displayAllStories();
+      });
+    },
+
+    addNewStory: function(event) {
+      event.preventDefault();
+
+      // grab values from forms
+      const title = $('#title').val();
+      const author = this.user.name;
+      const url = $('#url').val();
+
+      // storyData Payload for API
+      const storyDataPayload = {
+        title,
+        author,
+        url
+      };
+
+      this.storyList.addStory(this.user, storyDataPayload, response => {
+        $('#new-form').slideToggle();
+        console.log('addStory succeeded');
+        this.user.retrieveDetails(user => {
+          console.log('retreive details succeeded');
+          setTimeout(1000, this.displayAllStories.bind(this));
+          // retreive latest user details - user.ownStories
+          //   re-render dom stories
+
+          // TODO: Find a way to re-render DOM to show story right away
+        });
+      });
+    },
+
+    createEventListeners: function() {
+      // event listener - crete user submission
+      $('#createuser-form').on('submit', this.createUserSub.bind(this));
+
+      // event listener - submit new story to API
+      $('#new-form').on('submit', this.addNewStory.bind(this));
+
+      // event listener - parent delegation for stories container
+      $('#stories').on('click', '.far, .fas', function(e) {
+        $(e.target).toggleClass('far fas');
+
+        // grab story id of parent li target = storyID
+        // if - is storyID in userFavorite
+        //     if yes, then remove from userFavorite via APi call
+        //           then retreive updated details for user via API call
+
+        // else - (storyID is NOT in userFavorites)
+        //     run api call to add to userfavorites
+        //          retrieve details
+
+        // for each star, which story are we are talking ID
+        //    event listener ogic
+
+        //    html element logic
+        //      for each story we will need to store the storyID during display
+        //      rendering - user favorites - check if storyID is in userFavoriteArray
+        //    hide stars when you're not a user logged in
+      });
     }
   };
+
+  // event listeners for button elements - global events
+
   // initial all stories
   domView.checkForLoggedUser();
   domView.displayAllStories();
+  domView.createEventListeners();
 });

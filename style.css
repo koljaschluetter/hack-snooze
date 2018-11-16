@@ -21,11 +21,13 @@ body {
 }
 
 #new-form,
-#stories {
+#stories,
+#createuser-form {
   background-color: #f6f6ef;
 }
 
-#new-form {
+#new-form,
+#createuser-form {
   display: none;
 }
 

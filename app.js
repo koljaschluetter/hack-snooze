@@ -11,38 +11,38 @@ $(function() {
     $newForm.slideToggle();
   });
 
-  $newForm.on('submit', function(e) {
-    e.preventDefault();
+  // $newForm.on('submit', function(e) {
+  //   e.preventDefault();
 
-    let title = $title.val();
-    let url = $url.val();
-    let $newLink = $('<a>', {
-      text: ` ${title}`,
-      href: url,
-      target: '_blank'
-    });
+  //   let title = $title.val();
+  //   let url = $url.val();
+  //   let $newLink = $('<a>', {
+  //     text: ` ${title}`,
+  //     href: url,
+  //     target: '_blank'
+  //   });
 
-    // get short hostname: http://foo.bar.baz.com/page.html -> baz.com
-    let hostname = $newLink
-      .prop('hostname')
-      .split('.')
-      .slice(-2)
-      .join('.');
-    let $small = $('<small>', {
-      text: `(${hostname})`
-    });
+  //   // get short hostname: http://foo.bar.baz.com/page.html -> baz.com
+  //   let hostname = $newLink
+  //     .prop('hostname')
+  //     .split('.')
+  //     .slice(-2)
+  //     .join('.');
+  //   let $small = $('<small>', {
+  //     text: `(${hostname})`
+  //   });
 
-    let $star = $('<span>', {
-      class: 'far fa-star'
-    });
+  //   let $star = $('<span>', {
+  //     class: 'far fa-star'
+  //   });
 
-    let $newStory = $('<li>').append($star, $newLink, $small);
-    $submit.trigger('click');
-    $title.val('');
-    $url.val('');
+  //   let $newStory = $('<li>').append($star, $newLink, $small);
+  //   $submit.trigger('click');
+  //   $title.val('');
+  //   $url.val('');
 
-    $stories.append($newStory);
-  });
+  //   $stories.append($newStory);
+  // });
 
   $stories.on('click', 'small', function(e) {
     let currentHostname = $(e.target).text();
